@@ -609,7 +609,6 @@ Checkout
 */
 .checkout-form h3 span {
   color: var(--primaryColor);
-  letter-spacing: var(--mainSpacing);
 }
 .stripe-info {
   font-size: 80%;

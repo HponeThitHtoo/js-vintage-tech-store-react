@@ -1,10 +1,15 @@
 import React from "react";
-import { CartContext } from '../context/cart';
-import { UserContext } from '../context/user';
-import { useHistory } from 'react-router-dom';
-import EmptyCart from '../components/Cart/EmptyCart';
-import { CardElement, StripeProvider, Elements, injectStripe } from 'react-stripe-elements';
-import submitOrder from '../strapi/submitOrder';
+import { CartContext } from "../context/cart";
+import { UserContext } from "../context/user";
+import { useHistory } from "react-router-dom";
+import EmptyCart from "../components/Cart/EmptyCart";
+import {
+  CardElement,
+  StripeProvider,
+  Elements,
+  injectStripe,
+} from "react-stripe-elements";
+import submitOrder from "../strapi/submitOrder";
 
 function Checkout(props) {
   const { cart, total, clearCart } = React.useContext(CartContext);
@@ -21,22 +26,31 @@ function Checkout(props) {
     // console.log(props);
     const response = await props.stripe
       .createToken()
-      .catch(error => console.log(error));
+      .catch((error) => console.log(error));
 
     // console.log(response);
     const { token } = response;
 
     if (token) {
-      setError('');
+      setError("");
       const { id } = token;
-      let order = await submitOrder({ name: name, total: total, items: cart, stripeTokenId: id, userToken: user.token });
+      let order = await submitOrder({
+        name: name,
+        total: total,
+        items: cart,
+        stripeTokenId: id,
+        userToken: user.token,
+      });
       if (order) {
-        showAlert({ msg: 'your order is complete' });
+        showAlert({ msg: "your order is complete" });
         clearCart();
-        history.push('/');
+        history.push("/");
         return;
       } else {
-        showAlert({ msg: 'there was an error with your order. please try again!', type: 'danger' });
+        showAlert({
+          msg: "there was an error with your order. please try again!",
+          type: "danger",
+        });
       }
     } else {
       hideAlert();
@@ -50,11 +64,18 @@ function Checkout(props) {
     <section className="section form">
       <h2 className="section-title">checkout</h2>
       <form action="" className="checkout-form">
-        <h3>order total : <span>${total}</span></h3>
+        <h3>
+          order total : <span>${total}</span>
+        </h3>
         {/* single input */}
         <div className="form-control">
           <label htmlFor="name">name</label>
-          <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} />
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </div>
         {/* end of single input */}
         {/* card element */}
@@ -74,12 +95,17 @@ function Checkout(props) {
         {/* stripe errors */}
         {error && <p className="form-empty">{error}</p>}
         {/* empty value */}
-        {isEmpty
-          ? <p className="form-empty">please fill out name field</p>
-          : <button type="submit" onClick={handleSubmit} className="btn btn- btn-block">
+        {isEmpty ? (
+          <p className="form-empty">please fill out name field</p>
+        ) : (
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="btn btn- btn-block"
+          >
             submit
-            </button>
-        }
+          </button>
+        )}
       </form>
     </section>
   );
@@ -89,12 +115,12 @@ const CardForm = injectStripe(Checkout);
 
 const StripeWrapper = () => {
   return (
-    <StripeProvider apiKey="pk_test_51HON8LHvrdhlhMdK8MBhglvApWC0a42aDjrEWh7AcLbJ2dW7if3BcccyD0emYEpq8FfjjJ2BNzoQQeTyVqisuiSh00wryEuW0E">
+    <StripeProvider apiKey={process.env.REACT_APP_STRIPE_API_KEY}>
       <Elements>
         <CardForm></CardForm>
       </Elements>
     </StripeProvider>
   );
-}
+};
 
 export default StripeWrapper;
